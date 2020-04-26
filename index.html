@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+	<title>Programmer's piano</title>
+
+	<!--[if IE]>
+		<link rel="SHORTCUT ICON" href="{base-url}favicon.ico" />
+	<![endif]-->
+	<!--[if lt IE 9]>
+		<script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.2pre/html5shiv.js"></script>
+	<![endif]-->
+
+    <link rel="stylesheet" href="piano.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+</head>
+<body>
+    <div id="p-wrapper">
+    	<ul id="piano">
+    		<li><div data-note="note-c" class="anchor"></div></li>
+    		<li><div data-note="note-d" class="anchor"></div><span data-note="note-cs"></span></li>
+    		<li><div data-note="note-e" class="anchor"></div><span data-note="note-eb" ></span></li>
+            <li><div data-note="note-f" class="anchor"></div></li>
+            <li><div data-note="note-g" class="anchor"></div><span data-note="note-fs"></span></li>
+    		<li><div data-note="note-a" class="anchor"></div><span data-note="note-gs"></span></li>
+    		<li><div data-note="note-b" class="anchor"></div><span data-note="note-bb"></span></li>
+    	</ul>
+        <div id="track">
+            <div id="robot"></div>
+        </div>
+    </div>
+
+
+    <nav>
+        <a href="#" id="previous">Previous</a>
+        <a href="#" id="run">Run</a>
+        <a href="#" id="next">Next ></a>
+    </nav>
+
+    <code>
+        move_left( 10mm )
+        move_right( 10mm )
+        descend
+        ascend
+        wait( .5 seconds )
+    </code>
+
+    <code>
+        move_right( 30mm )
+        descend
+        ascend
+        wait( .5 seconds )
+        move_left( 10mm )
+        descend
+        ascend
+        wait( .5 seconds )
+        move_left( 5mm )
+        descend
+        ascend
+        wait( .5 seconds )
+        move_right( 5mm )
+        descend
+        ascend
+        wait( .5 seconds )
+        move_right( 10mm )
+        descend
+        ascend
+        wait( .5 seconds )
+        descend
+        ascend
+        wait( .5 seconds )
+        descend
+        ascend
+        wait( .5 seconds )
+    </code>
+
+    <code>
+        define function press_key
+            descend
+            ascend
+
+        move_right( 30mm )
+        press_key
+        wait( .5 seconds )
+        move_left( 10mm )
+        press_key
+        wait( .5 seconds )
+        move_left( 5mm )
+        press_key
+        wait( .5 seconds )
+        move_right( 5mm )
+        press_key
+        wait( .5 seconds )
+        move_right( 10mm )
+        press_key
+        wait( .5 seconds )
+        press_key
+        wait( .5 seconds )
+        press_key
+        wait( .5 seconds )
+    </code>
+
+    <code>
+        let current_position = 0;
+        define function playNote( note, duration )
+            if note = 'c'  then let new_position = 0
+            if note = 'cs' then let new_position = 5
+            if note = 'd'  then let new_position = 10
+            if note = 'eb' then let new_position = 15
+            if note = 'e'  then let new_position = 20
+            if note = 'f'  then let new_position = 30
+            if note = 'fs' then let new_position = 35
+            if note = 'g'  then let new_position = 40
+            if note = 'gs' then let new_position = 45
+            if note = 'a'  then let new_position = 50
+            if note = 'b'  then let new_position = 60
+
+            if new_position > current_position then
+               move_right( new_position - current_position )
+            else
+               move_left( current_position - new_position )
+
+            let current_position = old_position
+
+            press_key
+
+            wait( duration )
+    </code>
+
+    <code>
+        play_note( 'f',  .5 seconds );
+        play_note( 'e',  .5 seconds );
+        play_note( 'eb', .5 seconds );
+        play_note( 'e',  .5 seconds );
+        play_note( 'f',  .5 seconds );
+        play_note( 'f',  .5 seconds );
+        play_note( 'f',  1 seconds );
+        play_note( 'e',  .5 seconds );
+        play_note( 'e',  .5 seconds );
+        play_note( 'e',  1 seconds );
+        play_note( 'f',  .5 seconds );
+        play_note( 'f',  .5 seconds );
+        play_note( 'f',  .5 seconds );
+    </code>
+
+    <audio id="note-c"  src="audio/3c.mp3"></audio>
+    <audio id="note-cs" src="audio/3cs.mp3"></audio>
+    <audio id="note-d"  src="audio/3d.mp3"></audio>
+    <audio id="note-eb" src="audio/3eb.mp3"></audio>
+    <audio id="note-e"  src="audio/3e.mp3"></audio>
+    <audio id="note-f"  src="audio/3f.mp3"></audio>
+    <audio id="note-fs" src="audio/3fs.mp3"></audio>
+    <audio id="note-g"  src="audio/3g.mp3"></audio>
+    <audio id="note-gs" src="audio/3gs.mp3"></audio>
+    <audio id="note-a"  src="audio/3a.mp3"></audio>
+    <audio id="note-bb" src="audio/3bb.mp3"></audio>
+    <audio id="note-b"  src="audio/3b.mp3"></audio>
+
+    <script>
+
+        function robotToggle() {
+            $('#robot').addClass( 'down' );
+            setTimeout( function() {
+                $('#robot').removeClass( 'down' );
+            }, 100 );
+        }
+
+        var lastDelay = 0;
+
+        function playNote( note, delay )
+        {
+            var position = 0;
+            switch( note ) {
+                case 'c': position = 65; break;
+                case 'cs': position = 85; break;
+                case 'd': position = 105; break;
+                case 'eb': position = 125; break;
+                case 'e': position = 145; break;
+                case 'f': position = 185; break;
+                case 'fs': position = 205; break;
+                case 'g': position = 225; break;
+                case 'gs': position = 245; break;
+                case 'a': position = 265; break;
+                case 'b': position = 305; break;
+            }
+
+            setTimeout( function() {
+                $('audio').each( function() {
+                    this.currentTime = 0;
+                    this.pause();
+                });
+                console.log( note + "; " + delay );
+                $( "#robot" ).css( 'left', position );
+                robotToggle();
+                document.getElementById( 'note-' + note ).play();
+            }, delay * 500 );
+        }
+
+        $( document ).ready( function() {
+            $('[data-note]').click( function() {
+                var note = $(this).attr('data-note');
+                console.log( note );
+                $('audio').each( function() {
+                    this.currentTime = 0;
+                    this.pause();
+                });
+
+                document.getElementById(note).play();
+            });
+
+            var slides = $('code');
+            var count = slides.length;
+            var current_slide = 0;
+            $(slides[0]).addClass('active');
+            console.log( count );
+
+            $('#next').click( function() {
+                if( current_slide < count - 1) {
+                    $('code').removeClass('active');
+                    $(slides[++current_slide]).addClass('active');
+                }
+            });
+
+            $('#previous').click( function() {
+                if( current_slide > 1) {
+                    $('code').removeClass('active');
+                    $(slides[--current_slide]).addClass('active');
+                }
+            });
+            $('#run').click( function() {
+                if( current_slide == 0 ) return;
+
+                playNote( 'f', 1 );
+                playNote( 'e', 2 );
+                playNote( 'eb', 3 );
+                playNote( 'e', 4 );
+                playNote( 'f', 5 );
+                playNote( 'f', 6 );
+                playNote( 'f', 7 );
+
+                if( current_slide == 4 ) {
+                    playNote( 'e', 9 );
+                    playNote( 'e', 10 );
+                    playNote( 'e', 11 );
+                    playNote( 'f', 13 );
+                    playNote( 'f', 14 );
+                    playNote( 'f', 15 );
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>
